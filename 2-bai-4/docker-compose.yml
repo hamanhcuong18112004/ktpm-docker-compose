@@ -1,0 +1,31 @@
+services:
+    cadvisor:
+        image: gcr.io/cadvisor/cadvisor:v0.49.1
+        volumes:
+            - /:/rootfs:ro
+            - /var/run:/var/run:ro
+            - /sys:/sys:ro
+            - /var/lib/docker:/var/lib/docker:ro
+
+    prometheus:
+        image: prom/prometheus:latest
+        depends_on:
+            - cadvisor
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+            - prometheus_data:/prometheus
+
+    grafana:
+        image: grafana/grafana:latest
+        depends_on:
+            - prometheus
+        ports:
+            - "3000:3000"
+        volumes:
+            - grafana_data:/var/lib/grafana
+
+volumes:
+    prometheus_data:
+    grafana_data:

@@ -1,0 +1,30 @@
+services:
+    mongodb:
+        image: mongo:latest
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongo_data:/data/db
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    'mongosh --quiet --eval "db.adminCommand(''ping'').ok" || exit 1',
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
+
+    app:
+        build: .
+        depends_on:
+            mongodb:
+                condition: service_healthy
+        environment:
+            MONGO_URL: mongodb://mongodb:27017/votedb
+        ports:
+            - "3002:3000"
+
+volumes:
+    mongo_data:
